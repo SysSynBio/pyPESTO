@@ -8,7 +8,7 @@ from ..objective import Objective, ObjectiveBase, History
 
 def read_hdf5_optimization(f: h5py.File,
                            opt_id: h5py.Group,
-                           h5_hist_path: str) -> 'OptimizerResult':
+                           h5_hist_path: str = None) -> 'OptimizerResult':
     """
     Read HDF5 results per start.
 
@@ -28,8 +28,9 @@ def read_hdf5_optimization(f: h5py.File,
         if optimization_key == 'history':
             if 'history' in f[f'/optimization/results/{opt_id}'].attrs.keys():
                 history_path = os.path.normpath(
-                    os.path.join(h5_hist_path, f[f'/optimization/results'
-                                           f'/{opt_id}'].attrs['history']))
+                    os.path.join(h5_hist_path,
+                                 f[f'/optimization/results/{opt_id}'].attrs[
+                                     'history']))
                 result[optimization_key] = History.load(opt_id, history_path)
         elif optimization_key in f[f'/optimization/results/{opt_id}']:
             result[optimization_key] = \

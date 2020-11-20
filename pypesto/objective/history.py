@@ -393,6 +393,22 @@ class History(HistoryBase):
             if 1 in sensi_orders:
                 self._n_sres += 1
 
+    @staticmethod
+    def load(id: str,
+             file: str):
+        """Loads the History object from memory."""
+
+        _, file_type = os.path.splitext(file)
+
+        if file_type == '.csv':
+            return CsvHistory(file=file)
+        elif file_type == '.hdf5':
+            return Hdf5History.load(id=id, file=file)
+        else:
+            raise ValueError(
+                "Currently only history storage to '.csv' and '.hdf5'"
+                "is supported")
+
     @property
     def n_fval(self) -> int:
         return self._n_fval
