@@ -777,7 +777,7 @@ class Hdf5History(History):
             x: np.ndarray,
             sensi_orders: Tuple[int, ...],
             mode: str,
-            result: ResultType
+            result: ResultDict
     ) -> None:
         super().update(x, sensi_orders, mode, result)
         self._update_trace(x, sensi_orders, mode, result)
@@ -895,7 +895,7 @@ class Hdf5History(History):
                       x: np.ndarray,
                       sensi_orders: Tuple[int],
                       mode: str,
-                      result: ResultType):
+                      result: ResultDict):
         """
         Update and possibly store the trace.
         """
