@@ -124,12 +124,13 @@ def test_storage_trace():
             for hdf_res in result_hdf5.optimize_result.list:
                 if mem_res['id'] == hdf_res['id']:
                     for entry in history_entries:
+                        print(entry)
                         print(type(mem_res['history']))
-                        print(getattr(mem_res['history'],
-                                    f'get_{entry}_trace')())
+                        getattr(mem_res['history'],
+                                    f'get_{entry}_trace')()
                         print(type(hdf_res['history']))
-                        print(getattr(hdf_res['history'],
-                                    f'get_{entry}_trace')())
+                        getattr(hdf_res['history'],
+                                    f'get_{entry}_trace')()
                         np.testing.assert_array_equal(
                             getattr(mem_res['history'],
                                     f'get_{entry}_trace')(), getattr(

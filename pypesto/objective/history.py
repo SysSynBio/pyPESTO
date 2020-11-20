@@ -968,8 +968,10 @@ class Hdf5History(History):
 
         return trace_result
 
-    def get_x_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(X)
+    @trace_wrap
+    def get_x_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(X)[i] for i in ix]
 
     def get_fval_trace(self) -> Sequence[float]:
         return self._get_hdf5_entries(FVAL)
