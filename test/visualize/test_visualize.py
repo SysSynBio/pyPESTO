@@ -458,8 +458,6 @@ def test_optimizer_history_lowlevel():
 
 
 @close_fig
-<<<<<<< HEAD
-=======
 def test_optimization_stats():
     """ Test pypesto.visualize.optimization_stats """
 
@@ -528,7 +526,6 @@ def test_optimization_stats():
 
 
 @close_fig
->>>>>>> origin/develop
 def test_optimize_convergence():
     result = create_optimization_result()
     result_nan = create_optimization_result_nan_inf()
