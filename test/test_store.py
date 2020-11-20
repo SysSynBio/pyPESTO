@@ -89,7 +89,7 @@ def test_storage_trace():
     dim_full = 10
     lb = -5 * np.ones((dim_full, 1))
     ub = 5 * np.ones((dim_full, 1))
-    n_starts = 20
+    n_starts = 5
     startpoints = pypesto.startpoint.latin_hypercube(n_starts=n_starts,
                                                      lb=lb,
                                                      ub=ub)
@@ -98,8 +98,8 @@ def test_storage_trace():
     problem2 = pypesto.Problem(objective=objective2, lb=lb, ub=ub,
                                x_guesses=startpoints)
 
-    optimizer1 = pypesto.optimize.ScipyOptimizer()
-    optimizer2 = pypesto.optimize.ScipyOptimizer()
+    optimizer1 = pypesto.optimize.ScipyOptimizer(options={'maxiter': 100})
+    optimizer2 = pypesto.optimize.ScipyOptimizer(options={'maxiter': 100})
 
     with tempfile.TemporaryDirectory(dir=".") as tmpdirname:
         _, fn = tempfile.mkstemp(".hdf5", dir=f"{tmpdirname}")
@@ -122,15 +122,16 @@ def test_storage_trace():
             len(result_memory.optimize_result.list)
         for mem_res in result_memory.optimize_result.list:
             for hdf_res in result_hdf5.optimize_result.list:
+                print(hdf_res['id'],mem_res['id'])
                 if mem_res['id'] == hdf_res['id']:
                     for entry in history_entries:
-                        print(entry)
                         print(type(mem_res['history']))
                         getattr(mem_res['history'],
                                     f'get_{entry}_trace')()
                         print(type(hdf_res['history']))
                         getattr(hdf_res['history'],
                                     f'get_{entry}_trace')()
+
                         # np.testing.assert_array_equal(
                         #     getattr(mem_res['history'],
                         #             f'get_{entry}_trace')(), getattr(
