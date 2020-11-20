@@ -772,6 +772,9 @@ class Hdf5History(History):
         self.file = file
         self._generate_hdf5_group()
 
+    def __len__(self):
+        return len(self._get_hdf5_entries(TIME))
+
     def update(
             self,
             x: np.ndarray,
@@ -973,29 +976,45 @@ class Hdf5History(History):
             Union[Sequence[np.ndarray], np.ndarray]:
         return [self._get_hdf5_entries(X)[i] for i in ix]
 
-    def get_fval_trace(self) -> Sequence[float]:
-        return self._get_hdf5_entries(FVAL)
+    @trace_wrap
+    def get_fval_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(FVAL)[i] for i in ix]
 
-    def get_grad_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(GRAD)
+    @trace_wrap
+    def get_grad_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(GRAD)[i] for i in ix]
 
-    def get_hess_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(HESS)
+    @trace_wrap
+    def get_hess_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(HESS)[i] for i in ix]
 
-    def get_res_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(RES)
+    @trace_wrap
+    def get_res_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(RES)[i] for i in ix]
 
-    def get_sres_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(SRES)
+    @trace_wrap
+    def get_sres_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(SRES)[i] for i in ix]
 
-    def get_chi2_trace(self) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(CHI2)
+    @trace_wrap
+    def get_chi2_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(CHI2)[i] for i in ix]
 
-    def get_schi2_trace(self, t: Optional[int] = None) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(SCHI2)
+    @trace_wrap
+    def get_schi2_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(SCHI2)[i] for i in ix]
 
-    def get_time_trace(self, t: Optional[int] = None) -> Sequence[np.ndarray]:
-        return self._get_hdf5_entries(TIME)
+    @trace_wrap
+    def get_time_trace(self, ix: Union[int, Sequence[int], None] = None) -> \
+            Union[Sequence[np.ndarray], np.ndarray]:
+        return [self._get_hdf5_entries(TIME)[i] for i in ix]
 
 
 class OptimizerHistory:
