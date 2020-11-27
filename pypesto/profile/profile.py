@@ -2,6 +2,7 @@ import logging
 import numpy as np
 from typing import Callable, Union, Iterable
 
+from ..engine import Engine
 from ..objective.constants import GRAD
 from ..optimize import Optimizer, OptimizerResult
 from ..problem import Problem
@@ -10,6 +11,7 @@ from .result import ProfilerResult
 from .profile_next_guess import next_guess
 from .options import ProfileOptions
 from .util import initialize_profile
+from .task import ProfilerTask
 
 logger = logging.getLogger(__name__)
 
@@ -18,6 +20,7 @@ def parameter_profile(
         problem: Problem,
         result: Result,
         optimizer: Optimizer,
+        engine: Engine = None,
         profile_index: Iterable[int] = None,
         profile_list: int = None,
         result_index: int = 0,
@@ -38,6 +41,8 @@ def parameter_profile(
         The existence of an optimization result is obligatory.
     optimizer:
         The optimizer to be used along each profile.
+    engine:
+        The engine to be used.
     profile_index:
         List with the parameter indices to be profiled
         (by default all free indices).
@@ -86,35 +91,66 @@ def parameter_profile(
     # existing list of profiles
     global_opt = initialize_profile(problem, result, result_index,
                                     profile_index, profile_list)
+    # if engine==None do the original profiling
+    if engine is None:
+        # loop over parameters for profiling
+        for i_par in profile_index:
+            # only compute profiles for free parameters
+            if i_par in problem.x_fixed_indices:
+                continue
 
-    # loop over parameters for profiling
-    for i_par in profile_index:
-        # only compute profiles for free parameters
-        if i_par in problem.x_fixed_indices:
-            continue
+            # create an instance of ProfilerResult, which will be appended
+            # to the result object, when this profile is finished
+            current_profile = result.profile_result.get_profiler_result(
+                i_par=i_par, profile_list=profile_list)
 
-        # create an instance of ProfilerResult, which will be appended to the
-        # result object, when this profile is finished
-        current_profile = result.profile_result.get_profiler_result(
-            i_par=i_par, profile_list=profile_list)
+            # compute profile in descending and ascending direction
+            for par_direction in [-1, 1]:
+                # flip profile
+                current_profile.flip_profile()
 
-        # compute profile in descending and ascending direction
-        for par_direction in [-1, 1]:
-            # flip profile
-            current_profile.flip_profile()
+                # compute the current profile
+                current_profile = walk_along_profile(
+                    current_profile=current_profile,
+                    problem=problem,
+                    par_direction=par_direction,
+                    optimizer=optimizer,
+                    options=profile_options,
+                    create_next_guess=create_next_guess,
+                    global_opt=global_opt,
+                    i_par=i_par)
 
-            # compute the current profile
-            current_profile = walk_along_profile(
+        return result
+    else:
+        # create Tasks
+        tasks = []
+        # loop over parameters to create tasks
+        for i_par in profile_index:
+            # only compute profiles for free parameters
+            if i_par in problem.x_fixed_indices:
+                continue
+
+            current_profile = result.profile_result.get_profiler_result(
+                i_par=i_par, profile_list=profile_list)
+
+            task = ProfilerTask(
                 current_profile=current_profile,
                 problem=problem,
-                par_direction=par_direction,
                 optimizer=optimizer,
                 options=profile_options,
                 create_next_guess=create_next_guess,
                 global_opt=global_opt,
-                i_par=i_par)
+                i_par=i_par
+            )
+            tasks.append(task)
 
-    return result
+        # do multistart profiling
+        ret = engine.execute(tasks)
+
+        for profiler_result in ret:
+            result.profile_result.append_profiler_result(profiler_result)
+
+        return result
 
 
 def walk_along_profile(
