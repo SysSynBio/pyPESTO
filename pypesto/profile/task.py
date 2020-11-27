@@ -3,9 +3,9 @@ from typing import Callable
 
 from ..engine import Task
 from ..problem import Problem
-from .profile import walk_along_profile
 from .result import ProfilerResult
 from .options import ProfileOptions
+from .walk_along_path import walk_along_profile
 import pypesto.optimize
 
 logger = logging.getLogger(__name__)
@@ -24,7 +24,8 @@ class ProfilerTask(Task):
             i_par: int,
             global_opt: float,
             optimizer: 'pypesto.optimize.Optimizer',
-            create_next_guess: Callable
+            create_next_guess: Callable,
+            #walk_along_profile: Callable
     ):
         """
         Create the task object.
@@ -55,6 +56,7 @@ class ProfilerTask(Task):
         self.create_next_guess = create_next_guess
         self.i_par = i_par
         self.options = options
+        #self.walk_along_profile = walk_along_profile
 
     def execute(self) -> 'pypesto.profile.ProfilerResult':
         logger.info(f"Executing task {self.i_par}.")
