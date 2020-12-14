@@ -633,13 +633,21 @@ class CmaesOptimizer(Optimizer):
 class PyswarmsOptimizer(Optimizer):
     """
     Global optimization using pyswarms.
+
+    Parameters
+    ----------
+    options:
+        Optimizer options that are directly passed on to pyswarms.
+        c1: cognitive parameter
+        c2: social parameter
+        w: inertia parameter
     """
 
     def __init__(self, par_popsize: float = 10, options: Dict = None):
         super().__init__()
 
         if options is None:
-            options = {'maxiter': 200}
+            options = {'maxiter': 200, 'c1': 0.5, 'c2': 0.3, 'w': 0.9}
         self.options = options
         self.par_popsize = par_popsize
 
@@ -667,8 +675,16 @@ class PyswarmsOptimizer(Optimizer):
             n_particles=self.par_popsize, dimensions=len(x0), options=self.options,
             bounds=(lb, ub))
 
+        # not a very nice but sufficient fix for the problem (nope!)
+        #optimizer.swarm.pbest_cost = optimizer.swarm.pbest_cost[0]
+        # optimizer.swarm.pbest_pos = optimizer.swarm.pbest_pos[0]
+        # optimizer.swarm.position = optimizer.swarm.position[0]
+        # optimizer.swarm.velocity = optimizer.swarm.velocity[0]
+        # alternative: np.sum(optimizer.swarm.position, axis=0)
+
         cost, pos = optimizer.optimize(
             problem.objective.get_fval, iters=self.options['maxiter'])
+
 
         optimizer_result = OptimizerResult(
             x=np.array(cost),
