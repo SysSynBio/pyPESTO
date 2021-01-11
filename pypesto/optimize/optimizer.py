@@ -5,6 +5,7 @@ import abc
 import time
 import logging
 from typing import Dict
+from pyswarms.utils.functions import single_obj as fx
 
 from ..objective import (OptimizerHistory, HistoryOptions, CsvHistory)
 from ..objective.history import HistoryBase
@@ -676,14 +677,24 @@ class PyswarmsOptimizer(Optimizer):
             bounds=(lb, ub))
 
         # not a very nice but sufficient fix for the problem (nope!)
-        #optimizer.swarm.pbest_cost = optimizer.swarm.pbest_cost[0]
+        # optimizer.swarm.pbest_cost = optimizer.swarm.pbest_cost[0]
         # optimizer.swarm.pbest_pos = optimizer.swarm.pbest_pos[0]
         # optimizer.swarm.position = optimizer.swarm.position[0]
         # optimizer.swarm.velocity = optimizer.swarm.velocity[0]
         # alternative: np.sum(optimizer.swarm.position, axis=0)
 
+        def fun_broadcast(swarm):
+
+            n_particles = swarm.shape[0]
+            vector = np.zeros(n_particles)
+            for iPar, par in enumerate(swarm):
+                vector[iPar] = problem.objective.get_fval(par)
+
+            return vector
+
         cost, pos = optimizer.optimize(
-            problem.objective.get_fval, iters=self.options['maxiter'])
+            fun_broadcast, iters=self.options['maxiter'])
+            #problem.objective.get_fval, iters=self.options['maxiter'])
 
 
         optimizer_result = OptimizerResult(
