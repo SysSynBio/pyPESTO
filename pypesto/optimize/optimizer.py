@@ -701,8 +701,8 @@ class PyswarmsOptimizer(Optimizer):
 
 
         optimizer_result = OptimizerResult(
-            x=np.array(cost),
-            fval=pos
+            x=pos,
+            fval=np.array(cost)
         )
 
         return optimizer_result
