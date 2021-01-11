@@ -5,7 +5,6 @@ import abc
 import time
 import logging
 from typing import Dict
-from pyswarms.utils.functions import single_obj as fx
 
 from ..objective import (OptimizerHistory, HistoryOptions, CsvHistory)
 from ..objective.history import HistoryBase
@@ -676,25 +675,29 @@ class PyswarmsOptimizer(Optimizer):
             n_particles=self.par_popsize, dimensions=len(x0), options=self.options,
             bounds=(lb, ub))
 
-        # not a very nice but sufficient fix for the problem (nope!)
-        # optimizer.swarm.pbest_cost = optimizer.swarm.pbest_cost[0]
-        # optimizer.swarm.pbest_pos = optimizer.swarm.pbest_pos[0]
-        # optimizer.swarm.position = optimizer.swarm.position[0]
-        # optimizer.swarm.velocity = optimizer.swarm.velocity[0]
-        # alternative: np.sum(optimizer.swarm.position, axis=0)
 
-        def fun_broadcast(swarm):
+        def successively_working_fval(swarm):
+            """Evaluate the function for all parameters in the swarm object.
+
+            Parameters:
+            -----------
+            swarm: np.ndarray, shape (n_particales_in_swarm, n_parameters)
+
+            Returns:
+            --------
+            result: np.ndarray, shape (n_particles_in_swarm)
+            """
 
             n_particles = swarm.shape[0]
-            vector = np.zeros(n_particles)
+            result = np.zeros(n_particles)
             for iPar, par in enumerate(swarm):
-                vector[iPar] = problem.objective.get_fval(par)
+                result[iPar] = problem.objective.get_fval(par)
 
-            return vector
+            return result
+
 
         cost, pos = optimizer.optimize(
-            fun_broadcast, iters=self.options['maxiter'])
-            #problem.objective.get_fval, iters=self.options['maxiter'])
+            successively_working_fval, iters=self.options['maxiter'])
 
 
         optimizer_result = OptimizerResult(
