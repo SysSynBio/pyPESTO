@@ -647,7 +647,7 @@ class PyswarmsOptimizer(Optimizer):
         super().__init__()
 
         if options is None:
-            options = {'maxiter': 200, 'c1': 0.5, 'c2': 0.3, 'w': 0.9}
+            options = {'maxiter': 1000, 'c1': 0.5, 'c2': 0.3, 'w': 0.9}
         self.options = options
         self.par_popsize = par_popsize
 
@@ -663,9 +663,6 @@ class PyswarmsOptimizer(Optimizer):
     ) -> OptimizerResult:
         lb = problem.lb
         ub = problem.ub
-        bounds = []
-        for NumBounds in range(0, len(lb)):
-            bounds.append((lb[NumBounds], ub[NumBounds]))
 
         if pyswarms is None:
             raise ImportError(
